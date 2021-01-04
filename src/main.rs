@@ -2,10 +2,12 @@ use clap::{App, Arg};
 use colour::*;
 use std::env;
 use std::io;
-use std::io::Write;
+
+mod config;
 
 fn main() {
-    let central_deploy_folder = "CHANGE ME";
+    let loc = config::load_config();
+    println!("{}", loc.unwrap());
 
     let matches = App::new("Deploy Manager")
         .version("0.1")
@@ -52,14 +54,17 @@ fn main() {
                     .long("path")
                     .value_name("PATH")
                     .about("Path to the new application.")
-                    .default_value(&env::current_dir().unwrap().to_str().unwrap().to_string())
+                    .default_value(&env::current_dir().unwrap().to_str().unwrap())
                 )
         )
         .get_matches();
 
     if let Some(c) = matches.value_of("check") {
-        if c == "all" { println!("Checking all applications"); } 
-        else { println!("Checking application: {}", c); }
+        if c == "all" {
+            println!("Checking all applications");
+        } else {
+            println!("Checking application: {}", c);
+        }
     }
 
     if let Some(ref matches) = matches.subcommand_matches("new") {
@@ -68,12 +73,11 @@ fn main() {
             let p = matches.value_of("path");
             green_ln!("Creating new deployed app with name: {}", n.unwrap());
             green_ln!("Using path '{}' as application root", p.unwrap());
-            white_ln!("Using version number: 1.0");
+            green_ln!("Using version number: 1.0");
             println!("");
 
             let mut app_type = String::new();
             println!("What type of application is it you're deploying? ([c]#/[v]ue):");
-            io::stdout().flush().expect("some error message");
             match io::stdin().read_line(&mut app_type) {
                 Ok(_goes_into_input_above) => {}
                 Err(_no_updates_is_fine) => {}
@@ -97,11 +101,13 @@ fn main() {
             loop {
                 let mut deploy_folder = String::new();
                 match io::stdin().read_line(&mut deploy_folder) {
-                    Ok(_goes_into_input_above) => {},
+                    Ok(_goes_into_input_above) => {}
                     Err(_no_updates_is_fine) => {}
                 }
 
-                if deploy_folder.trim().is_empty() { break; }
+                if deploy_folder.trim().is_empty() {
+                    break;
+                }
                 deploy_folder = deploy_folder.trim().to_string();
                 deploy_folders_vec.push(deploy_folder);
             }
@@ -109,7 +115,7 @@ fn main() {
             green_ln!("Application will be deployed to the following folders:");
             for i in &deploy_folders_vec {
                 println!("{}", i);
-            }s
+            }
 
             //Move files to minimart from {p}
             //Create file with relevant info called deploy.conf
