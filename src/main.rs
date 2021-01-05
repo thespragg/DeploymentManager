@@ -67,6 +67,10 @@ fn main() {
         }
     }
 
+    if let Some(_) = matches.value_of("root") {
+        config::change_location();
+    }
+
     if let Some(ref matches) = matches.subcommand_matches("new") {
         if matches.is_present("name") && matches.is_present("path") {
             let n = matches.value_of("name");
